@@ -86,12 +86,30 @@ class Client():
 
     def panelrenew(self):
         self.gameboard.delete('oval')
-        for i in range(1,9):
-            for j in range(1, 9):
+        for i in range(1,5):
+            for j in range(1, 5):
                 if (self.game.board[i][j]==1):
                     self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="black", tags='oval')
                 elif (self.game.board[i][j]==2):
                     self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="white", tags = 'oval')
+
+                if (self.game.board[9-i][9-j]==1):
+                    self.gameboard.create_oval((9-j-1)*90+10, (9-i-1)*90+10, (9-j)*90-10, (9-i)*90-10, fill="black", tags='oval')
+                elif (self.game.board[9-i][9-j]==2):
+                    self.gameboard.create_oval((9-j-1)*90+10, (9-i-1)*90+10, (9-j)*90-10, (9-i)*90-10, fill="white", tags='oval')
+
+                if (self.game.board[i][9-j]==1):
+                    self.gameboard.create_oval((9-j-1)*90+10, (i-1)*90+10, (9-j)*90-10, i*90-10, fill="black", tags='oval')
+                elif (self.game.board[i][9-j]==2):
+                    self.gameboard.create_oval((9-j-1)*90+10, (i-1)*90+10, (9-j)*90-10, i*90-10, fill="white", tags = 'oval')
+
+                if (self.game.board[9-i][j]==1):
+                    self.gameboard.create_oval((j-1)*90+10, (9-i-1)*90+10, j*90-10, (9-i)*90-10, fill="black", tags='oval')
+                elif (self.game.board[9-i][j]==2):
+                    self.gameboard.create_oval((j-1)*90+10, (9-i-1)*90+10, j*90-10, (9-i)*90-10, fill="white", tags = 'oval')                
+
+                
+                
 
     def putpoint(self):
         for i in range(0, len(self.game.square), 2):
@@ -100,9 +118,15 @@ class Client():
 
     def gamestart(self):
         self.game.delete_list()
+        sign = 0
         while True:
             while self.computer_wait==1:
+                if self.game.turn >= 60:
+                    sign = 1
+                    break
                 b = 3
+            if sign == 1:
+                break
             self.game.count_turn()
             print("my turn")
             if (self.game.research(self.game.now_player)==0):
@@ -114,7 +138,10 @@ class Client():
             y = 0
             while (self.flag == 0):
                 t = 4
-            
+            flag=0
+            while flag==0:
+                flag = self.game.canput(self.game.now_player, self.x, self.y)
+
             self.flag = 0
             self.game.put(self.game.now_player, self.x, self.y)
             self.panelrenew()
@@ -122,14 +149,18 @@ class Client():
             self.game.printboard()
             self.computer_wait = 1
             print("finish my turn")
-            if (self.game.turn >= 60):
-                break
             
 
     def computer(self):
+        flag = 0
         while True:
             while self.computer_wait == 0:
+                if self.game.turn >= 60:
+                    flag = 1
+                    break
                 a = 3
+            if (flag == 1):
+                break
             self.game.count_turn()
             print("start computer turn")
             min = 100
@@ -155,9 +186,21 @@ class Client():
             self.game.printboard()
             self.computer_wait = 0
             print("finish computer turn")
-        
 
 
+    def com_level2(self):
+        for i in range(1, 9):
+                for j in range(1, 9):
+                    c = 0
+                    if (self.game.board[i][j]==0):
+                        for k in range(-1, 2):
+                            for t in range(-1, 2):
+                                if k!=0 or t!=0:
+                                    c += self.game.turnover_num(self.game.now_player, j, i, k, t)
+                        if c > max:
+                            max = c
+                            y = i
+                            x = j
 
     def copy(self):
         for i in range(1, 9):

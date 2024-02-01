@@ -9,7 +9,7 @@ class Othello():
     def __init__(self):
         self.now_player = 1
         self.next_player = 2
-        self.turn = 1
+        self.turn = 0
         for i in range(10):
             for j in range(10):
                 self.board[i][j] = -1
