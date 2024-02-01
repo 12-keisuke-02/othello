@@ -18,10 +18,10 @@ class Othello():
             for j in range(1, 9):
                 self.board[i][j] = 0
 
-        self.board[4][4] = 2
-        self.board[5][5] = 2
-        self.board[4][5] = 1
-        self.board[5][4] = 1
+        self.board[4][4] = 1
+        self.board[5][5] = 1
+        self.board[4][5] = 2
+        self.board[5][4] = 2
         self.printboard()
     
     def printboard(self):
@@ -36,39 +36,14 @@ class Othello():
         self.now_player = swap
 
     def put(self, p, x, y):
-        c = self.turnover_num(p, x, y, -1, -1)
-        for put in range(1, c):
-            self.board[y+put*(-1)][x+put*(-1)] = p
-
-        c = self.turnover_num(p, x, y, -1, 0)
-        for put in range(1, c):
-            self.board[y+put*0][x+put*(-1)] = p
-
-        c = self.turnover_num(p, x, y, -1, 1)
-        for put in range(1, c):
-            self.board[y+put*1][x+put*(-1)] = p
-
-        c = self.turnover_num(p, x, y, 0, -1)
-        for put in range(1, c):
-            self.board[y+put*(-1)][x+put*0] = p
-
-        c = self.turnover_num(p, x, y, 0, 1)
-        for put in range(1, c):
-            self.board[y+put*1][x+put*0] = p
-
-        c = self.turnover_num(p, x, y, 1, -1)
-        for put in range(1, c):
-            self.board[y+put*(-1)][x+put*1] = p
-
-        c = self.turnover_num(p, x, y, 1, 0)
-        for put in range(1, c):
-            self.board[y+put*0][x+put*1] = p
-
-        c = self.turnover_num(p, x, y, 1, 1)
-        for put in range(1, c):
-            self.board[y+put*1][x+put*1] = p
-
-        self.board[x][y] = p
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i==0 and j==0: continue
+                c = self.turnover_num(p, x, y, i, j)
+                for put in range(1, c):
+                    self.board[y+put*j][x+put*i] = p
+        
+        self.board[y][x] = p
 
     def turnover_num(self, p, x, y, dir_x, dir_y):
         i = 1
@@ -76,7 +51,7 @@ class Othello():
             i += 1
         if (self.board[y+i*dir_y][x+i*dir_x]==p):
             return i
-        else:
+        else :
             return 0
         
 
