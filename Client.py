@@ -43,10 +43,10 @@ class Client():
         self.gameboard.create_line(540, 0, 540, 720)
         self.gameboard.create_line(630, 0, 630, 720)
         self.gameboard.create_line(720, 0, 720, 720)
-        self.gameboard.create_oval(280, 280, 350, 350, fill="black")
-        self.gameboard.create_oval(370, 370, 440, 440, fill="black")
-        self.gameboard.create_oval(280, 370, 350, 440, fill="white")
-        self.gameboard.create_oval(370, 280, 440, 350, fill="white")
+        self.gameboard.create_oval(280, 280, 350, 350, fill="black", tags = 'oval')
+        self.gameboard.create_oval(370, 370, 440, 440, fill="black", tags = 'oval')
+        self.gameboard.create_oval(280, 370, 350, 440, fill="white", tags = 'oval')
+        self.gameboard.create_oval(370, 280, 440, 350, fill="white", tags = 'oval')
         self.gameboard.bind('<ButtonPress-1>', self.start_pickup)
 
         thread1 = threading.Thread(target=self.gamestart)
@@ -89,11 +89,17 @@ class Client():
         for i in range(1,9):
             for j in range(1, 9):
                 if (self.game.board[i][j]==1):
-                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="black")
+                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="black", tags='oval')
                 elif (self.game.board[i][j]==2):
-                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="white")
+                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="white", tags = 'oval')
+
+    def putpoint(self):
+        for i in range(0, len(self.game.square), 2):
+            self.gameboard.create_oval((self.game.square[i]-1)*90+30, (self.game.square[i+1]-1)*90+30, self.game.square[i]*90-30, self.game.square[i+1]*90-30, fill="red", tags='oval')
+        self.game.delete_list()
 
     def gamestart(self):
+        self.game.delete_list()
         while True:
             while self.computer_wait==1:
                 b = 3
@@ -103,15 +109,14 @@ class Client():
                 self.game.turnchange()
                 if (self.game.research(self.game.now_player)==0):
                     break
+            self.putpoint()
             x = 0
             y = 0
             while (self.flag == 0):
-                x = int(int(self.x) / 90) + 1
-                y = int(int(self.y) / 90) + 1
-                
+                t = 4
+            
             self.flag = 0
-            print(x, y)
-            self.game.put(self.game.now_player, x, y)
+            self.game.put(self.game.now_player, self.x, self.y)
             self.panelrenew()
             self.game.turnchange()
             self.game.printboard()
@@ -166,10 +171,8 @@ class Client():
     def start_pickup(self, event):
         self.start_x.set('x : ' + str(event.x))
         self.start_y.set('y : ' + str(event.y))
-        self.x = str(event.x)
-        self.y = str(event.y)
-        print(str(event.x))
-        print(str(event.y))
+        self.x = int(event.x / 90) + 1
+        self.y = int(event.y / 90) + 1
         self.flag = 1
 
 

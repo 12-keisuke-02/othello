@@ -40,16 +40,17 @@ class Othello():
             for j in range(-1, 2):
                 if i==0 and j==0: continue
                 c = self.turnover_num(p, x, y, i, j)
-                for put in range(1, c):
+                for put in range(1, c+1):
                     self.board[y+put*j][x+put*i] = p
         
         self.board[y][x] = p
 
     def turnover_num(self, p, x, y, dir_x, dir_y):
-        i = 1
-        while(self.board[y+i*dir_y][x+i*dir_x]==3-p):
+        i = 0
+        
+        while(self.board[y+(i+1)*dir_y][x+(i+1)*dir_x]==3-p):
             i += 1
-        if (self.board[y+i*dir_y][x+i*dir_x]==p):
+        if (self.board[y+(i+1)*dir_y][x+(i+1)*dir_x]==p):
             return i
         else :
             return 0
@@ -65,7 +66,7 @@ class Othello():
             for j in range(-1, 2):
                 if (i==0 and j==0):
                     continue
-                if (self.turnover_num(p, x, y, i, j)>1):
+                if (self.turnover_num(p, x, y, i, j)>0):
                     return 1
         return 0
     
