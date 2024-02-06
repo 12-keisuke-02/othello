@@ -1,8 +1,10 @@
 import tkinter as tk
+from tkinter import *
 import tkinter.ttk as ttk
 import sys
 import othello
 import threading
+import time
 
 class Client():
     
@@ -11,15 +13,25 @@ class Client():
         self.copy2 = [[i for i in range(10)] for j in range(10)]
         self.copy3 = [[i for i in range(10)] for j in range(10)]
         self.copy4 = [[i for i in range(10)] for j in range(10)]
+        self.valuate = [[120, -20, 20, 5, 5, 20, -20, 120],
+                        [-20, -40, -5, -5, -5, -5, -40, -20],
+                        [20, -5, 15, 3, 3, 15, -5, 15, -20],
+                        [5, -5, 3, 3, 3, 3, 15, -5, 5],
+                        [5, -5, 3, 3, 3, 3, 15, -5, 5],
+                        [20, -5, 15, 3, 3, 15, -5, 15, -20],
+                        [-20, -40, -5, -5, -5, -5, -40, -20],
+                        [120, -20, 20, 5, 5, 20, -20, 120]]
         self.x = 0
         self.y = 0
         self.flag = 0
+        self.pass_conti = 0
+        self.count = 2
         self.computer_wait = 0
         self.game = game
         self.player = 1
         self.root = tk.Tk()
         self.root.title("reversi game")
-        self.root.geometry("1000x800")
+        self.root.geometry("1000x900")
         self.start_x = tk.StringVar()
         self.start_y = tk.StringVar()
         self.gameboard = tk.Canvas(self.root, width=720, height=720)
@@ -43,10 +55,12 @@ class Client():
         self.gameboard.create_line(540, 0, 540, 720)
         self.gameboard.create_line(630, 0, 630, 720)
         self.gameboard.create_line(720, 0, 720, 720)
-        self.gameboard.create_oval(280, 280, 350, 350, fill="black", tags = 'oval')
-        self.gameboard.create_oval(370, 370, 440, 440, fill="black", tags = 'oval')
-        self.gameboard.create_oval(280, 370, 350, 440, fill="white", tags = 'oval')
-        self.gameboard.create_oval(370, 280, 440, 350, fill="white", tags = 'oval')
+        self.gameboard.create_oval(280, 280, 350, 350, fill="black", tags = 'oval44')
+        self.gameboard.create_oval(370, 370, 440, 440, fill="black", tags = 'oval55')
+        self.gameboard.create_oval(280, 370, 350, 440, fill="white", tags = 'oval45')
+        self.gameboard.create_oval(370, 280, 440, 350, fill="white", tags = 'oval54')
+        self.label1 = Label(self.root, text="あなたの石の数：2", font=("times, 16"))
+        self.label1.place(x=400, y=780)
         self.gameboard.bind('<ButtonPress-1>', self.start_pickup)
 
         thread1 = threading.Thread(target=self.gamestart)
@@ -77,47 +91,35 @@ class Client():
         self.gameboard.create_line(540, 0, 540, 720)
         self.gameboard.create_line(630, 0, 630, 720)
         self.gameboard.create_line(720, 0, 720, 720)
-
-
-    def gamepanel(self):
-        root = tk.Tk()
-        root.title("reversi game")
-        root.geometry("1000x800")
-
-    def panelrenew(self):
-        self.gameboard.delete('oval')
-        for i in range(1,5):
-            for j in range(1, 5):
-                if (self.game.board[i][j]==1):
-                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="black", tags='oval')
-                elif (self.game.board[i][j]==2):
-                    self.gameboard.create_oval((j-1)*90+10, (i-1)*90+10, j*90-10, i*90-10, fill="white", tags = 'oval')
-
-                if (self.game.board[9-i][9-j]==1):
-                    self.gameboard.create_oval((9-j-1)*90+10, (9-i-1)*90+10, (9-j)*90-10, (9-i)*90-10, fill="black", tags='oval')
-                elif (self.game.board[9-i][9-j]==2):
-                    self.gameboard.create_oval((9-j-1)*90+10, (9-i-1)*90+10, (9-j)*90-10, (9-i)*90-10, fill="white", tags='oval')
-
-                if (self.game.board[i][9-j]==1):
-                    self.gameboard.create_oval((9-j-1)*90+10, (i-1)*90+10, (9-j)*90-10, i*90-10, fill="black", tags='oval')
-                elif (self.game.board[i][9-j]==2):
-                    self.gameboard.create_oval((9-j-1)*90+10, (i-1)*90+10, (9-j)*90-10, i*90-10, fill="white", tags = 'oval')
-
-                if (self.game.board[9-i][j]==1):
-                    self.gameboard.create_oval((j-1)*90+10, (9-i-1)*90+10, j*90-10, (9-i)*90-10, fill="black", tags='oval')
-                elif (self.game.board[9-i][j]==2):
-                    self.gameboard.create_oval((j-1)*90+10, (9-i-1)*90+10, j*90-10, (9-i)*90-10, fill="white", tags = 'oval')                
+        
+    def panelrenew(self, now_player):
+        if now_player == 1:
+            for i in range(0, len(self.game.variation), 2):
+                print(self.game.variation[i], self.game.variation[i+1])
+                self.gameboard.delete("oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
+                self.gameboard.create_oval((self.game.variation[i]-1)*90+10, (self.game.variation[i+1]-1)*90+10, self.game.variation[i]*90-10, self.game.variation[i+1]*90-10, fill="black", tags = "oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
+        
+        elif now_player == 2:
+            for i in range(0, len(self.game.variation), 2):
+                print(self.game.variation[i], self.game.variation[i+1])
+                self.gameboard.delete("oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
+                self.gameboard.create_oval((self.game.variation[i]-1)*90+10, (self.game.variation[i+1]-1)*90+10, self.game.variation[i]*90-10, self.game.variation[i+1]*90-10, fill="white", tags = "oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
+        
+        self.game.delete_var()
+                        
 
                 
                 
 
     def putpoint(self):
         for i in range(0, len(self.game.square), 2):
-            self.gameboard.create_oval((self.game.square[i]-1)*90+30, (self.game.square[i+1]-1)*90+30, self.game.square[i]*90-30, self.game.square[i+1]*90-30, fill="red", tags='oval')
+            print("unko: " ,self.game.square[i], self.game.square[i+1])
+            self.gameboard.create_oval((self.game.square[i]-1)*90+30, (self.game.square[i+1]-1)*90+30, self.game.square[i]*90-30, self.game.square[i+1]*90-30, fill="red", tags='ovalred')
         self.game.delete_list()
 
     def gamestart(self):
         self.game.delete_list()
+        self.game.delete_var()
         sign = 0
         while True:
             while self.computer_wait==1:
@@ -131,8 +133,14 @@ class Client():
             print("my turn")
             if (self.game.research(self.game.now_player)==0):
                 self.game.turnchange()
-                if (self.game.research(self.game.now_player)==0):
+                self.pass_conti += 1
+                print("pass my turn")
+                if (self.pass_conti==1):
+                    self.computer_wait = 1
+                    continue
+                else:
                     break
+            self.pass_conti = 0
             self.putpoint()
             x = 0
             y = 0
@@ -144,11 +152,17 @@ class Client():
 
             self.flag = 0
             self.game.put(self.game.now_player, self.x, self.y)
-            self.panelrenew()
+            self.count = self.game.count_stone(self.game.now_player)
+            self.label1.place_forget()
+            self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
+            self.label1.place(x=400, y=780)
+            self.gameboard.delete("ovalred")
+            self.panelrenew(self.game.now_player)
             self.game.turnchange()
             self.game.printboard()
             self.computer_wait = 1
             print("finish my turn")
+        print("試合終了です")
             
 
     def computer(self):
@@ -159,13 +173,26 @@ class Client():
                     flag = 1
                     break
                 a = 3
+            time.sleep(2)
             if (flag == 1):
                 break
             self.game.count_turn()
             print("start computer turn")
+            if (self.game.research(self.game.now_player)==0):
+                self.game.delete_list()
+                self.game.turnchange()
+                self.pass_conti += 1
+                print("pass computer turn")
+                if (self.pass_conti == 1):
+                    self.computer_wait = 0
+                    continue
+                else:
+                    break
+            self.game.delete_list()
+            self.pass_conti = 0
             min = 100
             max = 0
-            self.copy()
+            self.copyboard(self.copy1, self.game.board)
             print("computers_turn")
             for i in range(1, 9):
                 for j in range(1, 9):
@@ -181,31 +208,27 @@ class Client():
                             x = j
             print(max, x, y)
             if (max > 0): self.game.put(self.game.now_player, x, y)
-            self.panelrenew()
+            self.panelrenew(self.game.now_player)
             self.game.turnchange()
+            self.count = self.game.count_stone(self.game.now_player)
+            self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
+            self.label1.place(x=400, y=780)
             self.game.printboard()
             self.computer_wait = 0
             print("finish computer turn")
+        print("試合終了です")
 
 
-    def com_level2(self):
-        for i in range(1, 9):
-                for j in range(1, 9):
-                    c = 0
-                    if (self.game.board[i][j]==0):
-                        for k in range(-1, 2):
-                            for t in range(-1, 2):
-                                if k!=0 or t!=0:
-                                    c += self.game.turnover_num(self.game.now_player, j, i, k, t)
-                        if c > max:
-                            max = c
-                            y = i
-                            x = j
+    def alpha_beta(self, now_player, alpha, beta, depth):
+        self.copyboard(self.copy1, self.game.board)
 
-    def copy(self):
+        
+
+
+    def copyboard(self, copy, original):
         for i in range(1, 9):
             for j in range(1, 9):
-                self.copy1[i][j] = self.game.board[i][j]
+                copy[i][j] = original[i][j]
 
 
 

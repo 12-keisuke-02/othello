@@ -1,5 +1,6 @@
 class Othello():
     board = [[i for i in range(10)] for j in range(10)]
+    variation = []
     black = 1
     white = 2
 
@@ -41,8 +42,11 @@ class Othello():
                 if i==0 and j==0: continue
                 c = self.turnover_num(p, x, y, i, j)
                 for put in range(1, c+1):
+                    self.variation.append(x+put*i)
+                    self.variation.append(y+put*j)
                     self.board[y+put*j][x+put*i] = p
-        
+        self.variation.append(x)
+        self.variation.append(y)
         self.board[y][x] = p
 
     def turnover_num(self, p, x, y, dir_x, dir_y):
@@ -83,11 +87,23 @@ class Othello():
         return 0
     
     def delete_list(self):
-        self.square = []
+        self.square.clear()
+        return
+
+    def delete_var(self):
+        self.variation.clear()
+        return
 
     def count_turn(self):
         self.turn += 1
 
+    def count_stone(self, p):
+        count = 0
+        for i in range(1, 9):
+            for j in range(1, 9):
+                if self.board[i][j]==p:
+                    count+=1
+        return count
 
 
 
