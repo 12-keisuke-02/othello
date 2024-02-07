@@ -13,6 +13,9 @@ class Client():
         self.copy2 = [[i for i in range(10)] for j in range(10)]
         self.copy3 = [[i for i in range(10)] for j in range(10)]
         self.copy4 = [[i for i in range(10)] for j in range(10)]
+        self.squarecopy = []
+        self.squarecopy2 = []
+        self.squarecopy3 = []
         self.valuate = [[120, -20, 20, 5, 5, 20, -20, 120],
                         [-20, -40, -5, -5, -5, -5, -40, -20],
                         [20, -5, 15, 3, 3, 15, -5, 15, -20],
@@ -95,13 +98,11 @@ class Client():
     def panelrenew(self, now_player):
         if now_player == 1:
             for i in range(0, len(self.game.variation), 2):
-                print(self.game.variation[i], self.game.variation[i+1])
                 self.gameboard.delete("oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
                 self.gameboard.create_oval((self.game.variation[i]-1)*90+10, (self.game.variation[i+1]-1)*90+10, self.game.variation[i]*90-10, self.game.variation[i+1]*90-10, fill="black", tags = "oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
         
         elif now_player == 2:
             for i in range(0, len(self.game.variation), 2):
-                print(self.game.variation[i], self.game.variation[i+1])
                 self.gameboard.delete("oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
                 self.gameboard.create_oval((self.game.variation[i]-1)*90+10, (self.game.variation[i+1]-1)*90+10, self.game.variation[i]*90-10, self.game.variation[i+1]*90-10, fill="white", tags = "oval"+str(self.game.variation[i])+str(self.game.variation[i+1]))
         
@@ -113,7 +114,6 @@ class Client():
 
     def putpoint(self):
         for i in range(0, len(self.game.square), 2):
-            print("unko: " ,self.game.square[i], self.game.square[i+1])
             self.gameboard.create_oval((self.game.square[i]-1)*90+30, (self.game.square[i+1]-1)*90+30, self.game.square[i]*90-30, self.game.square[i+1]*90-30, fill="red", tags='ovalred')
         self.game.delete_list()
 
@@ -129,7 +129,7 @@ class Client():
                 b = 3
             if sign == 1:
                 break
-            self.game.count_turn()
+            
             print("my turn")
             if (self.game.research(self.game.now_player)==0):
                 self.game.turnchange()
@@ -140,6 +140,7 @@ class Client():
                     continue
                 else:
                     break
+            self.game.count_turn()
             self.pass_conti = 0
             self.putpoint()
             x = 0
@@ -176,7 +177,7 @@ class Client():
             time.sleep(2)
             if (flag == 1):
                 break
-            self.game.count_turn()
+            
             print("start computer turn")
             if (self.game.research(self.game.now_player)==0):
                 self.game.delete_list()
@@ -188,30 +189,37 @@ class Client():
                     continue
                 else:
                     break
-            self.game.delete_list()
+            self.game.count_turn()
             self.pass_conti = 0
-            min = 100
+            min = 0
             max = 0
             self.copyboard(self.copy1, self.game.board)
-            print("computers_turn")
-            for i in range(1, 9):
-                for j in range(1, 9):
-                    c = 0
-                    if (self.game.board[i][j]==0):
-                        for k in range(-1, 2):
-                            for t in range(-1, 2):
-                                if k!=0 or t!=0:
-                                    c += self.game.turnover_num(self.game.now_player, j, i, k, t)
-                        if c > max:
-                            max = c
-                            y = i
-                            x = j
-            print(max, x, y)
-            if (max > 0): self.game.put(self.game.now_player, x, y)
+            self.alpha_beta_level2(self.game.now_player, max, min, 2)
+            #for hand in range(0, len(self.game.square), 2):
+                #i = self.game.square[hand]
+                #j = self.game.square[hand+1]
+                #if max < self.valuate[j-1][i-1]:
+                    #x = i
+                    #y = j
+                   # max = self.valuate[j-1][i-1]
+            
+            #for i in range(1, 9):
+              #  for j in range(1, 9):
+               #     c = 0
+                #    if (self.game.board[i][j]==0):
+                 ##          for t in range(-1, 2):
+                   #             if k!=0 or t!=0:
+                    #                c += self.game.turnover_num(self.game.now_player, j, i, k, t)
+                     #   if c > max:
+                      #      max = c
+                       #     y = i
+                        #    x = j
+            #self.game.put(self.game.now_player, x, y)
             self.panelrenew(self.game.now_player)
             self.game.turnchange()
             self.count = self.game.count_stone(self.game.now_player)
             self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
+            self.game.delete_list()
             self.label1.place(x=400, y=780)
             self.game.printboard()
             self.computer_wait = 0
@@ -219,16 +227,165 @@ class Client():
         print("試合終了です")
 
 
-    def alpha_beta(self, now_player, alpha, beta, depth):
-        self.copyboard(self.copy1, self.game.board)
+    def alpha_beta_level2(self, now_player, alpha: int, beta: int, depth: int):
+        true_x = 0
+        true_y = 0
+        if (depth==2):
+            self.copy1 = self.copyboard(self.copy1, self.game.board)
+            self.game.delete_list()
+            # 置けないとき0を返す
+            if (self.game.research(now_player)==0):
+                return alpha
+            self.squarecopy = self.canput_copy(self.squarecopy, self.game.square)
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+                self.game.put(now_player, x, y)
+                self.game.delete_var()
+                score = -self.alpha_beta_level2(3-now_player, alpha=-beta, beta=-alpha, depth=depth-1)
+                if hand == 0:
+                    beta = score
+                    true_x = x
+                    true_y = y
+                print(f"score = {score}, beta = {beta}")
+                if (beta < score):
+                    beta = score
+                    true_x = x
+                    true_y = y
+                self.game.board = self.copyboard(self.game.board, self.copy1)
+                self.game.square = self.canput_copy(self.game.square, self.squarecopy)
+            self.game.put(now_player, true_x, true_y)
 
+
+        elif (depth==1):
+            #self.copyboard(self.copy2, self.game.board)
+            self.game.delete_list()
+            self.copy2 = self.copyboard(self.copy2, self.game.board)
+            if (self.game.research(now_player)==0):
+                return
+            
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+                self.game.put(now_player, x, y)
+                score = self.calculate_score(now_player)
+                print(f"depth = {depth}, score = {score}, alpha = {alpha}, x = {x}, y = {y}")
+                if (score > alpha):
+                    alpha = score
+                self.game.board = self.copyboard(self.game.board, self.copy2)
+                
+                
+            self.game.delete_list()
+            self.game.delete_var()
+            return alpha
         
+        print(f"depth = {depth}, true_x={true_x}, true_y={true_y}")
+
+    def alpha_beta_level3(self, now_player, alpha: int, beta: int, depth: int):
+        true_x = 0
+        true_y = 0
+        if (depth==3):
+            self.copy1 = self.copyboard(self.copy1, self.game.board)
+            self.game.delete_list()
+            # 置けないとき0を返す
+            if (self.game.research(now_player)==0):
+                return alpha
+            self.squarecopy = self.canput_copy(self.squarecopy, self.game.square)
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+                self.game.put(now_player, x, y)
+                self.game.delete_var()
+                score = -self.alpha_beta_level3(3-now_player, alpha=-beta, beta=-alpha, depth=depth-1)
+                if hand == 0:
+                    beta = score
+                    true_x = x
+                    true_y = y
+                print(f"score = {score}, beta = {beta}")
+                if (beta < score):
+                    beta = score
+                    true_x = x
+                    true_y = y
+                self.game.board = self.copyboard(self.game.board, self.copy1)
+                self.game.square = self.canput_copy(self.game.square, self.squarecopy)
+            self.game.put(now_player, true_x, true_y)
+
+        elif (depth==2):
+            kamen_x = 0
+            kamen_y = 0
+            self.copy2 = self.copyboard(self.copy2, self.game.board)
+            self.game.delete_list()
+            if (self.game.research(now_player)==0):
+                return alpha
+            self.squarecopy2 = self.canput_copy(self.squarecopy2, self.game.square)
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+                self.game.put(now_player, x, y)
+                self.game.delete_var()
+                score = -self.alpha_beta_level3(3-now_player, alpha=-beta, beta=-alpha, depth=depth-1)
+                if hand == 0:
+                    beta = score
+                    kamen_x = x
+                    kamen_y = y
+                if (beta < score):
+                    beta = score
+                    kamen_x = x
+                    kamen_y = y
+                self.game.board = self.copyboard(self.game.board, self.copy2)
+                self.game.square = self.canput_copy(self.game.square, self.squarecopy)
+            return beta
+                    
+
+
+        elif (depth==1):
+            #self.copyboard(self.copy2, self.game.board)
+            self.game.delete_list()
+            self.copy3 = self.copyboard(self.copy3, self.game.board)
+            if (self.game.research(now_player)==0):
+                return
+            
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+                self.game.put(now_player, x, y)
+                score = self.calculate_score(now_player)
+                print(f"depth = {depth}, score = {score}, alpha = {alpha}, x = {x}, y = {y}")
+                if (score > alpha):
+                    alpha = score
+                self.game.board = self.copyboard(self.game.board, self.copy3)
+                
+                
+            self.game.delete_list()
+            self.game.delete_var()
+            return alpha
+        
+        print(f"depth = {depth}, true_x={true_x}, true_y={true_y}")
+        
+            
+    def calculate_score(self, now_player):
+        myscore=0
+        enemy = 0
+        for i in range(1, 9):
+            for j in range(1, 9):
+                if (self.game.board[i][j]==now_player):
+                    myscore += self.valuate[i-1][j-1]
+                elif (self.game.board[i][j]==3-now_player):
+                    enemy += self.valuate[i-1][j-1]
+
+        return myscore - enemy
 
 
     def copyboard(self, copy, original):
         for i in range(1, 9):
             for j in range(1, 9):
                 copy[i][j] = original[i][j]
+        return copy
+
+    def canput_copy(self, copy, original):
+        for i in range(len(original)):
+            copy.append(original[i])
+        return copy
 
 
 
