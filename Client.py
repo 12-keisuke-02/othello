@@ -194,7 +194,7 @@ class Client():
             min = 0
             max = 0
             self.copyboard(self.copy1, self.game.board)
-            self.alpha_beta_level2(self.game.now_player, max, min, 2)
+            self.alpha_beta_level3(self.game.now_player, max, min, 3)
             #for hand in range(0, len(self.game.square), 2):
                 #i = self.game.square[hand]
                 #j = self.game.square[hand+1]
@@ -290,24 +290,30 @@ class Client():
             # 置けないとき0を返す
             if (self.game.research(now_player)==0):
                 return alpha
+            self.squarecopy.clear()
             self.squarecopy = self.canput_copy(self.squarecopy, self.game.square)
+            #print(f"depth = {depth}, square = {self.game.square}")
             for hand in range(0, len(self.game.square), 2):
+                #print()
+                #print(f"depth = {depth}, x = {self.game.square[hand]}, y = {self.game.square[hand+1]}")
                 x = self.game.square[hand]
                 y = self.game.square[hand+1]
                 self.game.put(now_player, x, y)
                 self.game.delete_var()
                 score = -self.alpha_beta_level3(3-now_player, alpha=-beta, beta=-alpha, depth=depth-1)
                 if hand == 0:
-                    beta = score
+                    alpha = score
                     true_x = x
                     true_y = y
-                print(f"score = {score}, beta = {beta}")
-                if (beta < score):
-                    beta = score
+                #print(f"score = {score}, alpha = {alpha}")
+                if (alpha < score):
+                    alpha = score
                     true_x = x
                     true_y = y
                 self.game.board = self.copyboard(self.game.board, self.copy1)
                 self.game.square = self.canput_copy(self.game.square, self.squarecopy)
+                #print(f"depth = {depth}, square = {self.game.square}")
+            #print(f"depth = {depth}, true_x = {true_x}, true_y = {true_y}")
             self.game.put(now_player, true_x, true_y)
 
         elif (depth==2):
@@ -316,25 +322,34 @@ class Client():
             self.copy2 = self.copyboard(self.copy2, self.game.board)
             self.game.delete_list()
             if (self.game.research(now_player)==0):
+                self.game.delete_list()
                 return alpha
+            self.squarecopy2.clear()
             self.squarecopy2 = self.canput_copy(self.squarecopy2, self.game.square)
+            #print(f"depth = {depth}, square = {self.game.square}")
             for hand in range(0, len(self.game.square), 2):
                 x = self.game.square[hand]
                 y = self.game.square[hand+1]
+                #print(f"x = {x}, y = {y}")
                 self.game.put(now_player, x, y)
                 self.game.delete_var()
                 score = -self.alpha_beta_level3(3-now_player, alpha=-beta, beta=-alpha, depth=depth-1)
+                #print(f"score = {score}, depth={depth}")
                 if hand == 0:
-                    beta = score
+                    alpha = score
                     kamen_x = x
                     kamen_y = y
-                if (beta < score):
-                    beta = score
+                if (alpha < score):
+                    alpha = score
                     kamen_x = x
                     kamen_y = y
                 self.game.board = self.copyboard(self.game.board, self.copy2)
-                self.game.square = self.canput_copy(self.game.square, self.squarecopy)
-            return beta
+                self.game.square = self.canput_copy(self.game.square, self.squarecopy2)
+                if alpha >= beta:
+                    self.game.delete_list()
+                    return alpha
+            self.game.delete_list()
+            return alpha
                     
 
 
@@ -343,14 +358,18 @@ class Client():
             self.game.delete_list()
             self.copy3 = self.copyboard(self.copy3, self.game.board)
             if (self.game.research(now_player)==0):
-                return
+                self.game.delete_list()
+                return alpha
             
             for hand in range(0, len(self.game.square), 2):
                 x = self.game.square[hand]
                 y = self.game.square[hand+1]
                 self.game.put(now_player, x, y)
                 score = self.calculate_score(now_player)
-                print(f"depth = {depth}, score = {score}, alpha = {alpha}, x = {x}, y = {y}")
+                #print(f"depth = {depth}, score = {score}, alpha = {alpha}, x = {x}, y = {y}")
+                if hand==0:
+                    alpha = score
+
                 if (score > alpha):
                     alpha = score
                 self.game.board = self.copyboard(self.game.board, self.copy3)
