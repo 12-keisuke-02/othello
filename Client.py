@@ -414,6 +414,7 @@ class Client():
                     self.game.delete_list()
                     return alpha
             self.game.delete_list()
+            self.squarecopy2.clear()
             return alpha
 
 
@@ -513,6 +514,7 @@ class Client():
                     self.game.delete_list()
                     return alpha
             self.game.delete_list()
+            self.squarecopy2.clear()
             return alpha
         
         elif (depth==2):
@@ -548,6 +550,7 @@ class Client():
                     self.game.delete_list()
                     return alpha
             self.game.delete_list()
+            self.squarecopy3.clear()
             return alpha
 
         elif (depth==1):
@@ -598,6 +601,7 @@ class Client():
         return copy
 
     def canput_copy(self, copy, original):
+        copy = []
         for i in range(len(original)):
             copy.append(original[i])
         return copy
