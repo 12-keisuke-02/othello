@@ -6,6 +6,7 @@ import sys
 import othello
 import threading
 import time
+import math
 
 class Client():
     
@@ -14,6 +15,8 @@ class Client():
         self.copy2 = [[i for i in range(10)] for j in range(10)]
         self.copy3 = [[i for i in range(10)] for j in range(10)]
         self.copy4 = [[i for i in range(10)] for j in range(10)]
+        self.copy = [[[i for i in range(10)] for j in range(10)] for k in range(10)]
+        self.squarecopies = [[] for _ in range(10)]
         self.squarecopy = []
         self.squarecopy2 = []
         self.squarecopy3 = []
@@ -109,11 +112,13 @@ class Client():
         button_level2 = tk.Button(root, text = "level2", font=("MSゴシック", "20"), command=self.btn_click2)
         button_level3 = tk.Button(root, text = "level3", font=("MSゴシック", "20"), command=self.btn_click3)
         button_level4 = tk.Button(root, text = "level4", font=("MSゴシック", "20"), command=self.btn_click4)
+        button_level5 = tk.Button(root, text = "level5", font=("MSゴシック", "20"), command=self.btn_click5)
         label1.place(x=150, y=10)
         button_level1.place(x=200, y=80)
         button_level2.place(x=200, y=150)
         button_level3.place(x=200, y=220)
         button_level4.place(x=200, y=290)
+        button_level5.place(x=200, y=360)
         root.mainloop()
 
 
@@ -131,6 +136,10 @@ class Client():
     
     def btn_click4(self):
         self.level = 4
+        root.destroy()
+    
+    def btn_click5(self):
+        self.level = 5
         root.destroy()
         
     def panelrenew(self, now_player):
@@ -162,10 +171,10 @@ class Client():
         sign = 0
         while True:
             while self.computer_wait==1:
-                if self.game.turn >= 60 or self.pass_conti == 2:
+                # if self.game.turn >= 60 or self.pass_conti == 2:
+                if self.pass_conti == 2:
                     sign = 1
                     break
-                b = 3
             if sign == 1:
                 break
             
@@ -213,73 +222,7 @@ class Client():
         print("試合終了です")
             
 
-    def computer(self):
-        flag = 0
-        while True:
-            while self.computer_wait == 0:
-                if self.game.turn >= 60 or self.pass_conti==2:
-                    flag = 1
-                    break
-                a = 3
-            if (flag == 1):
-                break
-            time.sleep(1.2)
-            print("start computer turn")
-            if (self.game.research(self.game.now_player)==0):
-                self.game.delete_list()
-                self.game.turnchange()
-                self.pass_conti += 1
-                print("pass computer turn")
-                if (self.pass_conti == 1):
-                    self.computer_wait = 0
-                    continue
-                else:
-                    break
-            self.game.count_turn()
-            self.pass_conti = 0
-            min = 0
-            max = 0
-            self.copyboard(self.copy1, self.game.board)
-            if self.level == 1:
-                self.alpha_beta_level1(self.game.now_player)
-            elif self.level == 2:
-                self.alpha_beta_level2(self.game.now_player, max, min, self.level)
-            elif self.level == 3:
-                self.alpha_beta_level3(self.game.now_player, max, min, self.level)
-            elif self.level == 4:
-                self.alpha_beta_level4(self.game.now_player, max, min, self.level)
-            
-            #for hand in range(0, len(self.game.square), 2):
-                #i = self.game.square[hand]
-                #j = self.game.square[hand+1]
-                #if max < self.valuate[j-1][i-1]:
-                    #x = i
-                    #y = j
-                   # max = self.valuate[j-1][i-1]
-            
-            #for i in range(1, 9):
-              #  for j in range(1, 9):
-               #     c = 0
-                #    if (self.game.board[i][j]==0):
-                 ##          for t in range(-1, 2):
-                   #             if k!=0 or t!=0:
-                    #                c += self.game.turnover_num(self.game.now_player, j, i, k, t)
-                     #   if c > max:
-                      #      max = c
-                       #     y = i
-                        #    x = j
-            #self.game.put(self.game.now_player, x, y)
-            self.panelrenew(self.game.now_player)
-            self.game.turnchange()
-            self.count = self.game.count_stone(self.game.now_player)
-            self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
-            self.game.delete_list()
-            self.label1.place(x=400, y=780)
-            self.game.printboard()
-            self.computer_wait = 0
-            print("finish computer turn")
-        
-        print("試合終了です")
+    
 
     def alpha_beta_level1(self, now_player):
         max = -10000
@@ -402,12 +345,8 @@ class Client():
                 #print(f"score = {score}, depth={depth}")
                 if hand == 0:
                     alpha = score
-                    kamen_x = x
-                    kamen_y = y
                 if (alpha < score):
                     alpha = score
-                    kamen_x = x
-                    kamen_y = y
                 self.game.board = self.copyboard(self.game.board, self.copy2)
                 self.game.square = self.canput_copy(self.game.square, self.squarecopy2)
                 if alpha >= beta:
@@ -580,6 +519,268 @@ class Client():
             return alpha
         
         print(f"depth = {depth}, true_x={true_x}, true_y={true_y}")
+
+    def computer2(self):
+        flag = 0
+        while True:
+            while self.computer_wait == 0:
+                if self.game.turn >= 60 or self.pass_conti==2:
+                    flag = 1
+                    break
+                a = 3
+            if (flag == 1):
+                break
+            time.sleep(1.2)
+            print("start computer turn")
+            if (self.game.research(self.game.now_player)==0):
+                self.game.delete_list()
+                self.game.turnchange()
+                self.pass_conti += 1
+                print("pass computer turn")
+                if (self.pass_conti == 1):
+                    self.computer_wait = 0
+                    continue
+                else:
+                    break
+            self.game.count_turn()
+            self.pass_conti = 0
+            min = 1000000000
+            max = 0
+            self.copyboard(self.copy1, self.game.board)
+            self.alpha_beta(self.game.now_player, max, min, self.level, self.level)
+            """
+            if self.level == 1:
+                self.alpha_beta_level1(self.game.now_player)
+            elif self.level == 2:
+                self.alpha_beta_level2(self.game.now_player, max, min, self.level)
+            elif self.level == 3:
+                self.alpha_beta_level3(self.game.now_player, max, min, self.level)
+            elif self.level == 4:
+                self.alpha_beta_level4(self.game.now_player, max, min, self.level)
+            """
+            
+            #for hand in range(0, len(self.game.square), 2):
+                #i = self.game.square[hand]
+                #j = self.game.square[hand+1]
+                #if max < self.valuate[j-1][i-1]:
+                    #x = i
+                    #y = j
+                   # max = self.valuate[j-1][i-1]
+            
+            #for i in range(1, 9):
+              #  for j in range(1, 9):
+               #     c = 0
+                #    if (self.game.board[i][j]==0):
+                 ##          for t in range(-1, 2):
+                   #             if k!=0 or t!=0:
+                    #                c += self.game.turnover_num(self.game.now_player, j, i, k, t)
+                     #   if c > max:
+                      #      max = c
+                       #     y = i
+                        #    x = j
+            #self.game.put(self.game.now_player, x, y)
+            self.panelrenew(self.game.now_player)
+            self.game.turnchange()
+            self.count = self.game.count_stone(self.game.now_player)
+            self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
+            self.game.delete_list()
+            self.label1.place(x=400, y=780)
+            self.game.printboard()
+            self.computer_wait = 0
+            print("finish computer turn")
+        
+        print("試合終了です")
+
+    def computer(self):
+        flag = 0
+        while True:
+            while self.computer_wait == 0:
+                if self.game.turn >= 60 or self.pass_conti==2:
+                    flag = 1
+                    break
+                a = 3
+            if (flag == 1):
+                break
+            time.sleep(1.2)
+            print("start computer turn")
+            best_move = None
+            alpha = -math.inf
+            self.copy[self.level] = self.copyboard(self.copy[self.level], self.game.board)
+            self.game.count_turn()
+            if self.game.research(self.game.now_player) == 0:
+                self.game.delete_list()
+                self.game.turnchange()
+                self.pass_conti += 1
+                print("pass computer turn")
+                if (self.pass_conti == 1):
+                    self.computer_wait = 0
+                    continue
+                else:
+                    break
+            self.squarecopies[self.level] = self.canput_copy(self.squarecopies[self.level], self.game.square)
+            print(self.game.square)
+            for hand in range(0, len(self.game.square), 2):
+                x = self.game.square[hand]
+                y = self.game.square[hand+1]
+        
+                self.game.put(self.game.now_player, x, y)
+                self.game.delete_var()
+                score = -self.alpha_beta(3-self.game.now_player, alpha=-math.inf, beta=-alpha, depth=self.level-1)
+                if score > alpha:
+                    best_move = (x, y)
+                    alpha = score
+                self.game.board = self.copyboard(self.game.board, self.copy[self.level])
+                self.game.square = self.canput_copy(self.game.square, self.squarecopies[self.level])
+
+            self.game.put(self.game.now_player, best_move[0], best_move[1])
+
+
+            """
+            if self.level == 1:
+                self.alpha_beta_level1(self.game.now_player)
+            elif self.level == 2:
+                self.alpha_beta_level2(self.game.now_player, max, min, self.level)
+            elif self.level == 3:
+                self.alpha_beta_level3(self.game.now_player, max, min, self.level)
+            elif self.level == 4:
+                self.alpha_beta_level4(self.game.now_player, max, min, self.level)
+            """
+            
+            #for hand in range(0, len(self.game.square), 2):
+                #i = self.game.square[hand]
+                #j = self.game.square[hand+1]
+                #if max < self.valuate[j-1][i-1]:
+                    #x = i
+                    #y = j
+                   # max = self.valuate[j-1][i-1]
+            
+            #for i in range(1, 9):
+              #  for j in range(1, 9):
+               #     c = 0
+                #    if (self.game.board[i][j]==0):
+                 ##          for t in range(-1, 2):
+                   #             if k!=0 or t!=0:
+                    #                c += self.game.turnover_num(self.game.now_player, j, i, k, t)
+                     #   if c > max:
+                      #      max = c
+                       #     y = i
+                        #    x = j
+            #self.game.put(self.game.now_player, x, y)
+            self.panelrenew(self.game.now_player)
+            self.game.turnchange()
+            self.count = self.game.count_stone(self.game.now_player)
+            self.label1 = Label(self.root, text="あなたの石の数："+str(self.count), font=("times, 16"))
+            self.game.delete_list()
+            self.label1.place(x=400, y=780)
+            self.game.printboard()
+            self.computer_wait = 0
+            print("finish computer turn")
+        
+        print("試合終了です")
+
+    def alpha_beta(self, now_player, alpha: int, beta: int, depth: int):
+        # self.game.delete_list()
+        if depth == 0:
+            return self.calculate_score(3-now_player)
+        if self.game.research(now_player) == 0:
+            self.game.delete_list()
+            return alpha
+        
+
+        # 手を打つためのコピーを準備
+        self.copy[depth] = self.copyboard(self.copy[depth], self.game.board)
+        self.squarecopies[depth].clear()
+        self.squarecopies[depth] = self.canput_copy(self.squarecopies[depth], self.game.square)
+
+
+        for hand in range(0, len(self.game.square), 2):
+            x = self.game.square[hand]
+            y = self.game.square[hand + 1]
+
+            # 次の手を打つ
+            self.game.put(now_player, x, y)
+            self.game.delete_var()
+
+            score = -self.alpha_beta(3-self.game.now_player, alpha=-beta, beta=-alpha, depth=depth-1)
+            if score > alpha:
+                alpha = score
+
+            self.game.board = self.copyboard(self.game.board, self.copy[depth])
+            self.game.square = self.canput_copy(self.game.square, self.squarecopies[depth])
+
+            if alpha >= beta:
+                return alpha
+            
+        return alpha
+            
+
+
+    
+    def alpha_beta2(self, now_player, alpha: int, beta: int, depth: int, level: int):
+        true_x, true_y = 0, 0
+        score = 0
+        self.copy[depth] = self.copyboard(self.copy[depth], self.game.board)
+        self.game.delete_list()
+
+        
+        if self.game.research(now_player) == 0:
+            self.game.delete_list()
+            return alpha
+        
+        
+
+        # 手を打つためのコピーを準備
+        self.squarecopies[depth].clear()
+        self.squarecopies[depth] = self.canput_copy(self.squarecopies[depth], self.game.square)
+
+
+        for hand in range(0, len(self.game.square), 2):
+            x = self.game.square[hand]
+            y = self.game.square[hand + 1]
+
+            # 次の手を打つ
+            self.game.put(now_player, x, y)
+            self.game.delete_var()
+            if depth == 1:
+                score = self.calculate_score(now_player)
+                if (score > alpha):
+                    alpha = score
+                self.game.board = self.copyboard(self.game.board, self.copy[depth])
+
+            # 相手の番に移り、アルファベータ探索を再帰的に呼び出す
+            elif depth > 1:
+                score = -self.alpha_beta(3 - now_player, alpha=-beta, beta=-alpha, depth=depth - 1, level=level)
+                if depth == level:
+                    print(score)
+                    print(x)
+                    print(y)
+
+                # 最適な手を選択
+                if hand == 0:
+                    alpha = score
+                    true_x = x
+                    true_y = y
+
+                if score > alpha:
+                    alpha = score
+                    true_x = x
+                    true_y = y
+                self.game.board = self.copyboard(self.game.board, self.copy1)
+                self.game.square = self.canput_copy(self.game.square, self.squarecopies[depth])
+                if alpha >= beta:
+                    self.game.delete_list()
+                    return alpha
+
+        if depth == level:
+            print("unko")
+            self.game.put(now_player, true_x, true_y)
+            print(f"score: {score}")
+            print(f"x: {true_x}")
+            print(f"y: {true_y}")
+            print(self.game.variation)
+
+        return alpha
+    
             
     def calculate_score(self, now_player):
         myscore=0

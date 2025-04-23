@@ -97,6 +97,7 @@ class Othello():
     def count_turn(self):
         self.turn += 1
 
+
     def count_stone(self, p):
         count = 0
         for i in range(1, 9):
