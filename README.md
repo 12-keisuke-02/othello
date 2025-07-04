@@ -20,7 +20,7 @@ python client.py
 
 
 ### レベル選択
-![](images/levels.png)
+![](images/level.png)
 
 ### ゲーム画面
 ![](images/put_stone1.png)
