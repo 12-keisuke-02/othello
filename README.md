@@ -17,3 +17,11 @@ Pythonで実装したオセロAIです。αβ法（Alpha-Beta Pruning）を用�
 
 ## 実行方法
 python client.py
+
+
+### レベル選択
+![](images/levels.png)
+
+### ゲーム画面
+![](images/put_stone1.png)
+![](images/put_stone2.png)
