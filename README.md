@@ -25,3 +25,4 @@ python client.py
 ### ゲーム画面
 ![](images/put_stone1.png)
 ![](images/put_stone2.png)
+![](images/put_stone3.png)
